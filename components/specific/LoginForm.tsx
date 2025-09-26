@@ -8,6 +8,8 @@ import { FcGoogle } from 'react-icons/fc';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { signIn } from "next-auth/react"; // Importamos el hook de signIn
+
 
 // Esquema de validación con Zod
 const loginSchema = z.object({
@@ -28,9 +30,9 @@ export default function LoginForm() {
     // Aquí iría la lógica para enviar los datos a la API
   };
 
-  const handleGoogleLogin = () => {
-    console.log("Login con Google...");
-    // Lógica para autenticación de Google
+    const handleGoogleLogin = () => {
+    // Llama a la función signIn con el nombre del proveedor
+    signIn("google", { callbackUrl: "/dashboard" });
   };
 
   return (
@@ -94,8 +96,8 @@ export default function LoginForm() {
         </div>
       </div>
 
-      <button
-        type="button"
+       <button
+        type="button" // Cambia a type="button" para que no envíe el formulario
         onClick={handleGoogleLogin}
         className="w-full flex items-center justify-center py-2 px-4 bg-gray-700 text-white font-semibold rounded-md shadow-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition duration-300 ease-in-out"
       >
