@@ -32,7 +32,13 @@ export const Navbar = () => {
           {/* Logo y navegación izquierda */}
           <div className="flex items-center space-x-8">
             <Link href="/" className="text-xl font-bold text-white">
-              QX Logística
+                <Image
+                src="/logo.svg" // Cambia esto por la ruta de tu logo
+                alt="Logo QX"
+                width={220}
+                height={64}
+              />
+
             </Link>
             
             {/* Menú de navegación (solo mostrar si está logueado) */}
