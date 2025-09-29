@@ -32,7 +32,7 @@ export default function LoginForm() {
 
     const handleGoogleLogin = () => {
     // Llama a la función signIn con el nombre del proveedor
-    signIn("google", { callbackUrl: "/dashboard" });
+    signIn("google", { callbackUrl: "/gestionar-envio" });
   };
 
   return (

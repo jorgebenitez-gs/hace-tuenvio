@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ServiceTypeCard } from '@/components/gestionar-envio/ServiceTypeCard';
+import { ServiceTypeCard } from '@/components/specific/gestionar-envio/ServiceTypeCard';
 import { ServiceType } from '@/types';
 
   const serviceTypes: ServiceType[] = [
@@ -63,7 +63,7 @@ export default function GestionarEnvioPage() {
       <div className="container mx-auto px-4 max-w-6xl">
         <div className="text-center space-y-4 mb-8">
           <h1 className="text-4xl font-bold text-primary">
-            Gestióná tu envío
+            Gestioná tu envío
           </h1>
           <h2 className="text-xl text-primary/80 font-medium">
             Seleccioná el tipo de envío
