@@ -91,7 +91,7 @@ export const Navbar = () => {
                       <p className="text-xs text-gray-500 truncate">{user.email}</p>
                     </div>
                     <Link 
-                      href="/perfil" 
+                      href="/profile" // Enlace a la nueva página de perfil
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                     >
                       Mi Perfil
