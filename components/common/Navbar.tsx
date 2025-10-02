@@ -4,6 +4,7 @@ import React from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import Link from 'next/link';
 import Image from 'next/image';
+import Sidebar from './Sidebar';
 
 export const Navbar = () => {
   const { data: session, status } = useSession();
@@ -31,6 +32,7 @@ export const Navbar = () => {
           
           {/* Logo y navegación izquierda */}
           <div className="flex items-center space-x-8">
+            <Sidebar />
             <Link href="/" className="text-xl font-bold text-white">
                 <Image
                 src="/logo.svg" // Cambia esto por la ruta de tu logo
