@@ -4,6 +4,7 @@
 
 import { useSession, signOut } from 'next-auth/react';
 import Image from 'next/image';
+import Loader from '../common/Loader';
 
 export default function DashboardContent() {
   // Obtenemos los datos de la sesión (solo funciona en Client Components)
@@ -11,9 +12,7 @@ export default function DashboardContent() {
 
   if (status === 'loading') {
     return (
-      <div className="text-center mt-20">
-        <p className="text-xl">Cargando datos del usuario...</p>
-      </div>
+      <Loader />
     );
   }
 

@@ -5,6 +5,7 @@ import { useSession, signOut } from 'next-auth/react';
 import Link from 'next/link';
 import Image from 'next/image';
 import Sidebar from './Sidebar';
+import Loader from './Loader';
 
 export const Navbar = () => {
   const { data: session, status } = useSession();
@@ -12,16 +13,7 @@ export const Navbar = () => {
 
   if (status === 'loading') {
     return (
-      <nav className="bg-primary shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <div className="h-8 w-32 bg-gray-200 rounded animate-pulse"></div>
-            </div>
-            <div className="h-8 w-8 bg-gray-200 rounded-full animate-pulse"></div>
-          </div>
-        </div>
-      </nav>
+     <Loader />
     );
   }
 

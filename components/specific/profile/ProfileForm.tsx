@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import Image from 'next/image';
+import Loader from '@/components/common/Loader';
 
 // 1. Esquema de Validación con Zod
 const profileSchema = z.object({
@@ -58,7 +59,7 @@ export default function ProfileForm() {
   };
 
   if (status === 'loading') {
-    return <div className="text-center text-white mt-20">Cargando perfil...</div>;
+    return <Loader />
   }
 
   if (status === 'unauthenticated') {

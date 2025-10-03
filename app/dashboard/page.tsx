@@ -1,9 +1,6 @@
-// app/dashboard/page.tsx
-
 import { redirect } from 'next/navigation';
 import { getServerSession } from "next-auth";
 import DashboardContent from '@/components/specific/DashboardContent';
-import Loader from '@/components/common/Loader';
 
 export default async function DashboardPage() {
   const session = await getServerSession();
@@ -16,7 +13,7 @@ export default async function DashboardPage() {
   return (
     <div className="min-h-screen bg-gray-900 text-white p-8">
       <DashboardContent />
-      <Loader />
+   
     </div>
   );
 }
