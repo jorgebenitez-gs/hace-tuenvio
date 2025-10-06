@@ -1,78 +1,76 @@
 "use client";
 
-import React from 'react';
-import { useSession, signOut } from 'next-auth/react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import Image from 'next/image';
-import Loader from '@/components/common/Loader';
+import React from "react";
+import { useSession, signOut } from "next-auth/react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import Image from "next/image";
+import Loader from "@/components/common/Loader";
 
-// 1. Esquema de Validación con Zod
+// ✅ Esquema de validación
 const profileSchema = z.object({
-  // Campos de Google (Editables)
   name: z.string().min(2, "El nombre es obligatorio"),
-  lastName: z.string().min(2, "El apellido es obligatorio"), // Nuevo campo
-  
-  // Campos Adicionales (Nuevos)
-  email: z.string().email("Email inválido").optional(), // Lo hacemos opcional/readonly, pero lo mantenemos
-  phoneNumber: z.string().min(10, "Mínimo 10 dígitos para el teléfono").max(15).optional(),
-  address: z.string().min(5, "La dirección es obligatoria").optional(),
-  city: z.string().min(3, "La localidad es obligatoria").optional(),
+  lastName: z.string().optional(), // algunos usuarios del mock no lo tendrán
+  email: z.string().email("Email inválido").optional(),
+  telefono: z.string().min(6, "Teléfono demasiado corto").optional(),
+  direccion: z.string().min(3, "Dirección obligatoria").optional(),
+  localidad: z.string().min(2, "Localidad obligatoria").optional(),
 });
 
-// Tipo inferido del esquema
 type ProfileFormValues = z.infer<typeof profileSchema>;
 
 export default function ProfileForm() {
   const { data: session, status, update } = useSession();
-  
-  // 2. Valores por defecto (precargando datos de Google)
+
+  // ⚙️ Precargar valores según la sesión (mock o Google)
   const defaultValues: ProfileFormValues = {
     name: session?.user?.name || "",
-    lastName: "", // No viene de Google, se deja vacío para que el usuario lo complete
+    lastName: "",
     email: session?.user?.email || "",
-    phoneNumber: "",
-    address: "",
-    city: "",
+    telefono: (session?.user as any)?.telefono || "",
+    direccion: (session?.user as any)?.direccion || "",
+    localidad: (session?.user as any)?.localidad || "",
   };
-  
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<ProfileFormValues>({
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
-    defaultValues: defaultValues,
+    defaultValues,
   });
 
   const onSubmit = async (data: ProfileFormValues) => {
-    console.log("Datos del perfil a guardar:", data);
-    
-    // Aquí iría la lógica para enviar los datos a tu API/Base de Datos.
-    // Simulación de guardado:
-    await new Promise(resolve => setTimeout(resolve, 1500)); 
+    console.log("Datos de perfil guardados:", data);
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    // Opcional: Si actualizas el nombre, puedes actualizar la sesión localmente
-    // para que se vea reflejado inmediatamente en el Dashboard, usando NextAuth `update`.
+    // Si el nombre cambió, actualizamos la sesión local (solo visual)
     if (session?.user?.name !== data.name) {
-        await update({ name: data.name });
+      await update({ name: data.name });
     }
 
-    alert('Perfil actualizado con éxito!');
+    alert("Perfil actualizado correctamente ✅");
   };
 
-  if (status === 'loading') {
-    return <Loader />
-  }
+  if (status === "loading") return <Loader />;
+  if (status === "unauthenticated")
+    return (
+      <div className="text-center text-red-400 mt-20">
+        Debes iniciar sesión para ver tu perfil.
+      </div>
+    );
 
-  if (status === 'unauthenticated') {
-    return <div className="text-center text-red-400 mt-20">Debes iniciar sesión para ver tu perfil.</div>;
-  }
+  const isGoogleUser = (session?.user?.image && !("role" in session.user)) || false;
 
   return (
     <div className="max-w-xl mx-auto bg-gray-800 p-8 rounded-xl shadow-2xl border-t-4 border-[#f5333f]">
       <h1 className="text-3xl font-bold mb-6 text-white border-b border-gray-700 pb-4">
-        Editar Mi Perfil
+        Mi Perfil
       </h1>
-      
-      {/* Información de Sesión y Foto */}
+
+      {/* Datos del usuario */}
       <div className="flex items-center space-x-6 mb-8 p-4 bg-gray-700 rounded-lg">
         {session?.user?.image && (
           <Image
@@ -84,91 +82,122 @@ export default function ProfileForm() {
           />
         )}
         <div>
-          <p className="text-xl font-semibold text-white">{session?.user?.name || "Usuario"}</p>
-          <p className="text-gray-400 text-sm">Sesión activa con Google</p>
+          <p className="text-xl font-semibold text-white">
+            {session?.user?.name || "Usuario"}
+          </p>
+          <p className="text-gray-400 text-sm">
+            {isGoogleUser
+              ? "Sesión activa con Google"
+              : `Rol: ${(session?.user as any)?.role || "Sin rol"}`}
+          </p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        
-        {/* Nombre y Apellido */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-200">Nombre</label>
-            <input
-              id="name"
-              {...register('name')}
-              className="mt-1 block w-full px-3 py-2 border border-gray-600 bg-gray-900 text-white rounded-md focus:outline-none focus:ring-[#f5333f] focus:border-[#f5333f]"
-            />
-            {errors.name && <p className="mt-1 text-xs text-red-500">{errors.name.message}</p>}
-          </div>
-          <div>
-            <label htmlFor="lastName" className="block text-sm font-medium text-gray-200">Apellido</label>
-            <input
-              id="lastName"
-              {...register('lastName')}
-              className="mt-1 block w-full px-3 py-2 border border-gray-600 bg-gray-900 text-white rounded-md focus:outline-none focus:ring-[#f5333f] focus:border-[#f5333f]"
-            />
-            {errors.lastName && <p className="mt-1 text-xs text-red-500">{errors.lastName.message}</p>}
-          </div>
+        {/* Nombre */}
+        <div>
+          <label htmlFor="name" className="block text-sm font-medium text-gray-200">
+            Nombre
+          </label>
+          <input
+            id="name"
+            {...register("name")}
+            className="mt-1 block w-full px-3 py-2 border border-gray-600 bg-gray-900 text-white rounded-md focus:outline-none focus:ring-[#f5333f] focus:border-[#f5333f]"
+          />
+          {errors.name && <p className="mt-1 text-xs text-red-500">{errors.name.message}</p>}
         </div>
 
-        {/* Email (Solo lectura) */}
+        {/* Apellido (solo si no viene de Google) */}
+        {!isGoogleUser && (
+          <div>
+            <label htmlFor="lastName" className="block text-sm font-medium text-gray-200">
+              Apellido
+            </label>
+            <input
+              id="lastName"
+              {...register("lastName")}
+              className="mt-1 block w-full px-3 py-2 border border-gray-600 bg-gray-900 text-white rounded-md focus:outline-none focus:ring-[#f5333f] focus:border-[#f5333f]"
+            />
+            {errors.lastName && (
+              <p className="mt-1 text-xs text-red-500">{errors.lastName.message}</p>
+            )}
+          </div>
+        )}
+
+        {/* Email */}
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-200">Email (Google)</label>
+          <label htmlFor="email" className="block text-sm font-medium text-gray-200">
+            Email
+          </label>
           <input
             id="email"
             type="email"
-            value={session?.user?.email || ''}
-            readOnly // El email de Google no debería ser editable
+            value={session?.user?.email || ""}
+            readOnly
             className="mt-1 block w-full px-3 py-2 border border-gray-700 bg-gray-700 text-gray-400 rounded-md cursor-not-allowed"
           />
         </div>
 
         {/* Teléfono */}
         <div>
-          <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-200">Teléfono</label>
+          <label htmlFor="telefono" className="block text-sm font-medium text-gray-200">
+            Teléfono
+          </label>
           <input
-            id="phoneNumber"
+            id="telefono"
             type="tel"
-            {...register('phoneNumber')}
+            {...register("telefono")}
             className="mt-1 block w-full px-3 py-2 border border-gray-600 bg-gray-900 text-white rounded-md focus:outline-none focus:ring-[#f5333f] focus:border-[#f5333f]"
           />
-          {errors.phoneNumber && <p className="mt-1 text-xs text-red-500">{errors.phoneNumber.message}</p>}
+          {errors.telefono && (
+            <p className="mt-1 text-xs text-red-500">{errors.telefono.message}</p>
+          )}
         </div>
 
-        {/* Dirección y Localidad */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label htmlFor="address" className="block text-sm font-medium text-gray-200">Dirección</label>
-            <input
-              id="address"
-              {...register('address')}
-              className="mt-1 block w-full px-3 py-2 border border-gray-600 bg-gray-900 text-white rounded-md focus:outline-none focus:ring-[#f5333f] focus:border-[#f5333f]"
-            />
-            {errors.address && <p className="mt-1 text-xs text-red-500">{errors.address.message}</p>}
-          </div>
-          <div>
-            <label htmlFor="city" className="block text-sm font-medium text-gray-200">Localidad</label>
-            <input
-              id="city"
-              {...register('city')}
-              className="mt-1 block w-full px-3 py-2 border border-gray-600 bg-gray-900 text-white rounded-md focus:outline-none focus:ring-[#f5333f] focus:border-[#f5333f]"
-            />
-            {errors.city && <p className="mt-1 text-xs text-red-500">{errors.city.message}</p>}
-          </div>
+        {/* Dirección */}
+        <div>
+          <label htmlFor="direccion" className="block text-sm font-medium text-gray-200">
+            Dirección
+          </label>
+          <input
+            id="direccion"
+            {...register("direccion")}
+            className="mt-1 block w-full px-3 py-2 border border-gray-600 bg-gray-900 text-white rounded-md focus:outline-none focus:ring-[#f5333f] focus:border-[#f5333f]"
+          />
+          {errors.direccion && (
+            <p className="mt-1 text-xs text-red-500">{errors.direccion.message}</p>
+          )}
         </div>
 
-        {/* Botón de Guardar */}
+        {/* Localidad */}
+        <div>
+          <label htmlFor="localidad" className="block text-sm font-medium text-gray-200">
+            Localidad
+          </label>
+          <input
+            id="localidad"
+            {...register("localidad")}
+            className="mt-1 block w-full px-3 py-2 border border-gray-600 bg-gray-900 text-white rounded-md focus:outline-none focus:ring-[#f5333f] focus:border-[#f5333f]"
+          />
+          {errors.localidad && (
+            <p className="mt-1 text-xs text-red-500">{errors.localidad.message}</p>
+          )}
+        </div>
+
+        {/* Botón Guardar */}
         <button
           type="submit"
           disabled={isSubmitting}
           className={`w-full py-3 px-4 text-white font-bold rounded-lg shadow-md transition duration-300 ease-in-out ${
-            isSubmitting ? 'bg-gray-600 cursor-not-allowed' : 'bg-[#f5333f] hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#f5333f]'
+            isSubmitting
+              ? "bg-gray-600 cursor-not-allowed"
+              : "bg-[#f5333f] hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#f5333f]"
           }`}
         >
-          {isSubmitting ? 'Guardando...' : 'Guardar Cambios'}
+          {isSubmitting ? "Guardando..." : "Guardar Cambios"}
         </button>
+
+       
       </form>
     </div>
   );
